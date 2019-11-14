@@ -1,30 +1,30 @@
 <?php 
 use Restserver \Libraries\REST_Controller;
 
-Class User extends REST_Controller {
+Class Branches extends REST_Controller {
 	public function __construct() {
 		header('Access-Control-Allow-Origin: *');
 		header("Access-Control-Allow-Methods: GET, OPTIONS, POST, DELETE");
 		header("Access-Control-Allow-Headers: Content-Type, ContentLength, Accept-Encoding");
 		parent::__construct();
-		$this->load->model('UserModel');
+		$this->load->model('BranchesModel');
 		$this->load->library('form_validation');
 	}
 
 	public function index_get() {
-		return $this->returnData($this->db->get('users')->result(), false);
+		return $this->returnData($this->db->get('branches')->result(), false);
 	}
 
 	public function index_post($id=null) {
 		$validation=$this->form_validation;
-		$rule=$this->UserModel->rules();
-
-		if($id==null) {
-			array_push($rule, [ 'field'=> 'password', 'label'=> 'password', 'rules'=> 'required'], [ 'field'=> 'email', 'label'=> 'email', 'rules'=> 'required|valid_email|is_unique[users.email]']);
-		}
+        $rule=$this->BranchesModel->rules();
+        
+        if($id==null) {
+            array_push($rule, [ 'field'=> 'phoneNumber', 'label'=> 'phoneNumber', 'rules'=> 'required|numeric|is_unique[branches.phoneNumber]']);
+        }
 
 		else {
-			array_push($rule, [ 'field'=> 'email', 'label'=> 'email', 'rules'=> 'required|valid_email']);
+			array_push($rule, [ 'field'=> 'phoneNumber', 'label'=> 'phoneNumber', 'rules'=> 'required|numeric|is_unique[branches.phoneNumber]']);
 		}
 
 		$validation->set_rules($rule);
@@ -33,17 +33,18 @@ Class User extends REST_Controller {
 			return $this->returnData($this->form_validation->error_array(), true);
 		}
 
-		$user=new UserData();
-		$user->name=$this->post('name');
-		$user->password=$this->post('password');
-		$user->email=$this->post('email');
+		$branches=new BranchesData();
+		$branches->name=$this->post('name');
+		$branches->address=$this->post('address');
+        $branches->phoneNumber=$this->post('phoneNumber');
+        $branches->created_at=$this->post('created_at');
 
 		if($id==null) {
-			$response=$this->UserModel->store($user);
+			$response=$this->BranchesModel->store($branches);
 		}
 
 		else {
-			$response=$this->UserModel->update($user, $id);
+			$response=$this->BranchesModel->update($branches, $id);
 		}
 
 		return $this->returnData($response['msg'], $response['error']);
@@ -54,7 +55,7 @@ Class User extends REST_Controller {
 			return $this->returnData('Parameter Id Tidak Ditemukan', true);
 		}
 
-		$response=$this->UserModel->destroy($id);
+		$response=$this->BranchesModel->destroy($id);
 		return $this->returnData($response['msg'], $response['error']);
 	}
 
@@ -65,8 +66,9 @@ Class User extends REST_Controller {
 	}
 }
 
-Class UserData {
+Class BranchesData {
 	public $name;
-	public $password;
-	public $email;
+	public $address;
+    public $phoneNumber;
+    public $created_at;
 }
